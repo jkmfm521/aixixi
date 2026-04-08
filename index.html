@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>付勉的个人智能日历</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+        }
+        body {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+            background: #f0f2f5;
+        }
+        .title {
+            text-align: center;
+            margin: 25px 0;
+            color: #1f2937;
+            font-size: 2rem;
+        }
+        .auth-box {
+            text-align: center;
+            margin: 20px 0 30px;
+        }
+        #password {
+            padding: 10px 15px;
+            width: 220px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-left: 8px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .calendar {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .event-item {
+            padding: 12px 15px;
+            margin: 10px 0;
+            background: #f8fafc;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #2563eb;
+        }
+        .event-item:hover {
+            background: #f1f5f9;
+        }
+        .add-form {
+            margin: 25px 0;
+            padding: 20px;
+            background: #eff6ff;
+            border-radius: 8px;
+            display: none;
+        }
+        .add-form input {
+            padding: 10px 15px;
+            margin: 0 8px 10px 0;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        #eventDate {
+            width: 200px;
+        }
+        #eventTitle {
+            width: 300px;
+        }
+        .admin-tools {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            display: none;
+        }
+        .admin-tools h3 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        pre {
+            padding: 15px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+        .empty-tip {
+            text-align: center;
+            color: #6b7280;
+            padding: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">📅 付勉的个人智能日历</h1>
+
+    <!-- 密码验证 -->
+    <div class="auth-box">
+        <input type="password" id="password" placeholder="输入编辑密码解锁">
+        <button onclick="checkPassword()">解锁编辑</button>
+    </div>
+
+    <!-- 添加日程表单 -->
+    <div class="add-form" id="addForm">
+        <input type="date" id="eventDate" required>
+        <input type="text" id="eventTitle" placeholder="输入日程内容（如：晚上跑步/项目截止）" required>
+        <button onclick="addEvent()">添加日程</button>
+    </div>
+
+    <!-- 日程列表 -->
+    <div class="calendar" id="eventList">
+        <div class="empty-tip">暂无日程，解锁后可添加</div>
+    </div>
+
+    <!-- 管理员工具：复制JSON -->
+    <div class="admin-tools" id="adminTools">
+        <h3>👇 复制以下内容到 GitHub 的 data.json 文件</h3>
+        <pre id="jsonOutput"></pre>
+    </div>
+
+    <script>
+        // ====================== 【必须修改这2处】 ======================
+        const ADMIN_PASSWORD = "fmqwe123"; // 改成你的密码（比如：Fumian@2024）
+        const DATA_URL = "https://raw.githubusercontent.com/jkmfm521/my-personal-calendar/main/data.json";
+        // ==============================================================
+
+        let isAdmin = false;
+        let events = [];
+
+        // 页面加载时获取日程
+        window.onload = loadEvents;
+
+        // 密码验证逻辑
+        function checkPassword() {
+            const inputPwd = document.getElementById("password").value.trim();
+            if (inputPwd === ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById("addForm").style.display = "block";
+                document.getElementById("adminTools").style.display = "block";
+                alert("✅ 解锁成功！你可以添加/删除日程了");
+            } else {
+                alert("❌ 密码错误，仅管理员可编辑");
+            }
+        }
+
+        // 从GitHub加载日程数据
+        async function loadEvents() {
+            try {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error("数据加载失败");
+                events = await response.json() || [];
+                renderEvents();
+            } catch (error) {
+                events = [];
+                renderEvents();
+            }
+        }
+
+        // 渲染日程列表
+        function renderEvents() {
+            const listContainer = document.getElementById("eventList");
+            listContainer.innerHTML = "";
+
+            if (events.length === 0) {
+                listContainer.innerHTML = '<div class="empty-tip">暂无日程，解锁后可添加</div>';
+                return;
+            }
+
+            // 按日期升序排序
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            events.forEach((event, index) => {
+                const eventDiv = document.createElement("div");
+                eventDiv.className = "event-item";
+                eventDiv.innerHTML = `
+                    <span>${event.date} → ${event.title}</span>
+                    ${isAdmin ? `<button onclick="deleteEvent(${index})">删除</button>` : ""}
+                `;
+                listContainer.appendChild(eventDiv);
+            });
+
+            // 更新JSON输出
+            document.getElementById("jsonOutput").textContent = JSON.stringify(events, null, 2);
+        }
+
+        // 添加日程
+        function addEvent() {
+            if (!isAdmin) return alert("❌ 无编辑权限");
+            const date = document.getElementById("eventDate").value;
+            const title = document.getElementById("eventTitle").value.trim();
+
+            if (!date || !title) {
+                return alert("⚠️ 日期和日程内容不能为空");
+            }
+
+            events.push({ date, title });
+            renderEvents();
+            // 清空输入框
+            document.getElementById("eventDate").value = "";
+            document.getElementById("eventTitle").value = "";
+        }
+
+        // 删除日程
+        function deleteEvent(index) {
+            if (!isAdmin) return;
+            if (confirm("确定要删除这个日程吗？")) {
+                events.splice(index, 1);
+                renderEvents();
+            }
+        }
+    </script>
+</body>
+</html>
