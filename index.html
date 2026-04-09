@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>智能日历（带微信表情）</title>
+  <title>智能万年历（表情+图片+背景色）</title>
   <style>
     * {
       margin: 0;
@@ -83,22 +83,21 @@
       gap: 8px;
     }
     .day-cell {
-      background: #fff;
       border-radius: 8px;
-      min-height: 110px;
+      min-height: 120px;
       padding: 8px;
       position: relative;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       cursor: pointer;
       transition: transform 0.2s;
       overflow: hidden;
+      background: #ffffff;
     }
     .day-cell:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     .day-cell.today {
-      background: #e8f0fe;
       border: 2px solid #4285f4;
     }
     .day-number {
@@ -131,19 +130,32 @@
     .edit-area h4 {
       margin-bottom: 10px;
     }
-    /* 表情按钮 + 面板 */
-    .emoji-row {
+    .tool-row {
       display: flex;
       align-items: center;
-      margin-bottom: 8px;
       gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
     }
-    .emoji-btn {
+    .emoji-btn, .color-btn {
       padding: 6px 12px;
       background: #f5f7fa;
       border: 1px solid #ddd;
       border-radius: 4px;
       cursor: pointer;
+    }
+    .color-input {
+      width: 100px;
+      height: 32px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .color-code {
+      width: 120px;
+      padding: 6px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
     .emoji-panel {
       display: none;
@@ -168,7 +180,6 @@
     .emoji-item:hover {
       background: #f0f2f5;
     }
-
     .edit-area textarea {
       width: 100%;
       padding: 12px;
@@ -271,7 +282,7 @@
 <body>
 <div class="container">
   <div class="header">
-    <div class="title">📅 智能日历</div>
+    <div class="title">📅 智能万年历（表情+图片+背景色）</div>
     <div class="auth-box">
       <input type="password" id="pwd" placeholder="编辑密码" />
       <button onclick="unlockEdit()">解锁编辑</button>
@@ -293,13 +304,18 @@
   <!-- 编辑区 -->
   <div class="edit-area" id="editPanel">
     <h4>编辑：<span id="editDate"></span></h4>
-    <div class="emoji-row">
+
+    <div class="tool-row">
       <button class="emoji-btn" onclick="toggleEmoji()">😀 表情</button>
-      <div class="emoji-panel" id="emojiPanel"></div>
+      <input type="color" class="color-input" id="bgColor">
+      <input type="text" class="color-code" id="bgColorCode" placeholder="#ffffff">
     </div>
+
+    <div class="emoji-panel" id="emojiPanel"></div>
+
     <textarea id="editText" placeholder="文字、表情、图片都可以..."></textarea>
     <div class="edit-tips">
-      💡 支持：点击表情插入 | 拖拽/粘贴图片 | 换行
+      💡 支持：选择背景色 | 点击插入表情 | 拖拽/粘贴图片 | 自动保存
     </div>
     <div class="edit-buttons">
       <button class="btn-save" onclick="saveDay()">保存</button>
@@ -324,26 +340,15 @@
 </div>
 
 <script>
-  // ========== 配置 ==========
-  const ADMIN_PWD = "123456"; // 你自己的密码
-  const DATA_URL = "https://raw.githubusercontent.com/jkmfm521/aixixi/main/data.json"; // 你的JSON地址
+  // ========== 你的配置（必须改）==========
+  const ADMIN_PWD = "123456";
+  const DATA_URL = "https://raw.githubusercontent.com/jkmfm521/aixixi/main/data.json";
 
-  // ========== 微信风格表情库（可自己加）==========
+  // ========== 表情库 ==========
   const EMOJIS = [
-    "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇",
-    "🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
-    "😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔",
-    "🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","😮",
-    "😯","😲","😳","🥺","😦","😧","😨","😰","😥","😢",
-    "😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤",
-    "😡","😠","🤬","😈","👿","👻","💀","☠️","👽","👾",
-    "🤖","🎃","😺","😸","😹","😻","😼","😽","🙀","😿",
-    "😾","👍","👎","👊","✊","🤛","🤜","👏","🙌","👋",
-    "🤚","🖐️","✋","🖖","👌","🤏","✌️","🤞","🤟","🤘",
-    "👌","👍","👎","✊","👊","👏","🙏","💪","🤝","🍻",
-    "🔥","✨","⭐","🌟","💫","🎉","🎊","🎈","🎆","🎇",
-    "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔",
-    "🌹","🌸","🌺","🌻","🌼","💐","🌷","🌱","🌲","🌳"
+    "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😗","😙","😚",
+    "👍","👎","✊","👏","🙏","🔥","✨","🎉","🎊","❤️","🧡","💛","💚","💙","💜","🌹",
+    "🌸","🌺","🌻","🌼","💐","🎂","🍰","☕","🍻","🥂","🏆","🎈","🛫","🎁","💯"
   ];
 
   let isAdmin = false;
@@ -352,7 +357,6 @@
   let dayData = {};
   let currentDate = "";
 
-  // 初始化
   window.onload = async () => {
     await loadData();
     renderCalendar();
@@ -360,7 +364,6 @@
     initDragPaste();
   };
 
-  // 加载JSON
   async function loadData() {
     try {
       let res = await fetch(DATA_URL);
@@ -370,7 +373,6 @@
     }
   }
 
-  // 渲染日历
   function renderCalendar() {
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
@@ -380,19 +382,18 @@
     const cal = document.getElementById("calendar");
     cal.innerHTML = "";
 
-    // 空白
     for (let i=0; i<firstWeekDay; i++) cal.appendChild(document.createElement("div"));
 
-    // 日期格子
     for (let d=1; d<=days; d++) {
       const dateStr = `${year}-${String(month+1).padStart(2,0)}-${String(d).padStart(2,0)}`;
       const isToday = new Date().toISOString().split("T")[0] === dateStr;
-      const content = dayData[dateStr] || "";
+      const item = dayData[dateStr] || {};
 
       const cell = document.createElement("div");
       cell.className = `day-cell ${isToday ? "today" : ""}`;
-      cell.dataset.date = dateStr;
-      // 渲染：图片转img标签，表情正常显示
+      cell.style.background = item.bg || "#ffffff";
+
+      let content = item.text || "";
       let html = content
         .replace(/(https?:\/\/.*\.(png|jpg|jpeg|gif|webp))/gi, '<img src="$1">')
         .replace(/\n/g, "<br>");
@@ -406,7 +407,7 @@
     }
   }
 
-  // ========== 表情面板 ==========
+  // ========== 表情功能 ==========
   function initEmojiPanel() {
     const panel = document.getElementById("emojiPanel");
     panel.style.display = "grid";
@@ -425,17 +426,15 @@
   }
   function insertEmoji(emoji) {
     const t = document.getElementById("editText");
-    const v = t.value;
     const pos = t.selectionStart;
-    t.value = v.slice(0, pos) + emoji + v.slice(pos);
+    t.value = t.value.slice(0, pos) + emoji + t.value.slice(pos);
     t.selectionStart = t.selectionEnd = pos + emoji.length;
     t.focus();
   }
 
-  // ========== 拖拽/粘贴图片 ==========
+  // ========== 拖拽图片 ==========
   function initDragPaste() {
     const t = document.getElementById("editText");
-    // 粘贴
     t.addEventListener("paste", async e => {
       const items = e.clipboardData.items;
       for (let item of items) {
@@ -446,7 +445,6 @@
         }
       }
     });
-    // 拖拽
     t.addEventListener("dragover", e => e.preventDefault());
     t.addEventListener("drop", async e => {
       e.preventDefault();
@@ -470,25 +468,43 @@
   // ========== 编辑 ==========
   function openEdit(dateStr) {
     currentDate = dateStr;
+    const item = dayData[dateStr] || {};
     document.getElementById("editDate").innerText = dateStr;
-    document.getElementById("editText").value = dayData[dateStr] || "";
+    document.getElementById("editText").value = item.text || "";
+    document.getElementById("bgColor").value = item.bg || "#ffffff";
+    document.getElementById("bgColorCode").value = item.bg || "#ffffff";
     document.getElementById("editPanel").style.display = "block";
     document.getElementById("emojiPanel").style.display = "none";
   }
+
   function saveDay() {
     if (!isAdmin) return;
-    dayData[currentDate] = document.getElementById("editText").value.trim();
+    const text = document.getElementById("editText").value.trim();
+    const bg = document.getElementById("bgColor").value;
+    dayData[currentDate] = { text, bg };
     renderCalendar();
     updateJson();
-    alert("保存成功！");
+    alert("✅ 保存成功！");
   }
+
   function clearDay() {
     if (!isAdmin) return;
     delete dayData[currentDate];
     document.getElementById("editText").value = "";
+    document.getElementById("bgColor").value = "#ffffff";
+    document.getElementById("bgColorCode").value = "#ffffff";
     renderCalendar();
     updateJson();
   }
+
+  // 颜色同步
+  document.getElementById("bgColor").addEventListener("input", function(){
+    document.getElementById("bgColorCode").value = this.value;
+  });
+  document.getElementById("bgColorCode").addEventListener("input", function(){
+    document.getElementById("bgColor").value = this.value;
+  });
+
   function unlockEdit() {
     if (document.getElementById("pwd").value === ADMIN_PWD) {
       isAdmin = true;
@@ -499,11 +515,11 @@
       alert("❌ 密码错误");
     }
   }
+
   function updateJson() {
     document.getElementById("jsonOut").textContent = JSON.stringify(dayData, null, 2);
   }
 
-  // ========== 月份切换 ==========
   function prevMonth() {
     month--;
     if (month < 0) { month = 11; year--; }
@@ -517,7 +533,8 @@
 
   // ========== 详情弹窗 ==========
   function openDetail(dateStr) {
-    const c = dayData[dateStr] || "暂无内容";
+    const item = dayData[dateStr] || {};
+    const c = item.text || "暂无内容";
     const html = c
       .replace(/(https?:\/\/.*\.(png|jpg|jpeg|gif|webp))/gi, '<img src="$1">')
       .replace(/\n/g, "<br>");
@@ -529,13 +546,10 @@
     document.getElementById("detailModal").style.display = "none";
   }
 
-  // 点击空白关闭表情面板
   window.onclick = e => {
     const p = document.getElementById("emojiPanel");
     const btn = document.querySelector(".emoji-btn");
-    if (!p.contains(e.target) && e.target !== btn) {
-      p.style.display = "none";
-    }
+    if (!p.contains(e.target) && e.target !== btn) p.style.display = "none";
   };
 </script>
 </body>
