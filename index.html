@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>智能万年历（表情+图片+背景色）</title>
+  <title>付勉的智能万年历（图片修复版）</title>
   <style>
     * {
       margin: 0;
@@ -132,7 +132,7 @@
       display: block;
     }
 
-    /* 编辑区 */
+    /* 编辑区新增上传按钮样式 */
     .edit-area {
       margin-top: 20px;
       background: #fff;
@@ -152,13 +152,21 @@
       margin-bottom: 10px;
       flex-wrap: wrap;
     }
-    .emoji-btn, .color-btn {
+    .emoji-btn, .upload-btn {
       padding: 6px 12px;
       background: #f5f7fa;
       border: 1px solid #ddd;
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
+    }
+    .upload-btn {
+      background: #e8f0fe;
+      border-color: #4285f4;
+      color: #4285f4;
+    }
+    #fileInput {
+      display: none;
     }
     .color-input {
       width: 60px;
@@ -340,21 +348,23 @@
 
   <div class="calendar" id="calendar"></div>
 
-  <!-- 编辑区 -->
+  <!-- 编辑区：新增上传按钮 -->
   <div class="edit-area" id="editPanel">
     <h4>编辑：<span id="editDate"></span></h4>
 
     <div class="tool-row">
       <button class="emoji-btn" onclick="toggleEmoji()">😀 表情</button>
+      <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📤 上传图片</button>
+      <input type="file" id="fileInput" accept="image/*">
       <input type="color" class="color-input" id="bgColor">
       <input type="text" class="color-code" id="bgColorCode" placeholder="#ffffff">
     </div>
 
     <div class="emoji-panel" id="emojiPanel"></div>
 
-    <textarea id="editText" placeholder="支持：文字、表情、拖拽图片、粘贴图片、输入图片链接..."></textarea>
+    <textarea id="editText" placeholder="支持：文字、表情、上传/拖拽/粘贴图片、输入图片链接..."></textarea>
     <div class="edit-tips">
-      💡 提示：1. 点击表情插入；2. 直接拖拽图片到输入框；3. 复制图片按 Ctrl+V 粘贴；4. 输入图片链接
+      💡 提示：1. 点击表情插入；2. 点击上传按钮选图片；3. 拖拽/粘贴图片；4. 输入图片链接；5. 选背景色
     </div>
     <div class="edit-buttons">
       <button class="btn-save" onclick="saveDay()">保存内容</button>
@@ -380,7 +390,7 @@
 
 <script>
   // ========== 你的配置（必须改）==========
-  const ADMIN_PWD = "123456"; // 替换成你的密码
+  const ADMIN_PWD = "your_strong_password"; // 替换成你的密码
   const DATA_URL = "https://raw.githubusercontent.com/jkmfm521/aixixi/main/data.json";
 
   // ========== 微信风格表情库 ==========
@@ -403,6 +413,7 @@
     initEmojiPanel();
     initDragPaste();
     initColorSync();
+    initFileUpload(); // 新增：初始化上传功能
   };
 
   // 加载数据
@@ -411,7 +422,6 @@
       let res = await fetch(DATA_URL);
       if (!res.ok) throw new Error("数据加载失败");
       const data = await res.json();
-      // 兼容旧数据格式
       dayData = typeof data === 'object' && !Array.isArray(data) ? data : {};
     } catch (e) {
       console.log("首次加载，数据为空");
@@ -429,12 +439,8 @@
     const cal = document.getElementById("calendar");
     cal.innerHTML = "";
 
-    // 填充月初空白
-    for (let i=0; i<firstWeekDay; i++) {
-      cal.appendChild(document.createElement("div"));
-    }
+    for (let i=0; i<firstWeekDay; i++) cal.appendChild(document.createElement("div"));
 
-    // 渲染日期格子
     for (let d=1; d<=days; d++) {
       const dateStr = `${year}-${String(month+1).padStart(2,0)}-${String(d).padStart(2,0)}`;
       const isToday = new Date().toISOString().split("T")[0] === dateStr;
@@ -444,12 +450,9 @@
       cell.className = `day-cell ${isToday ? "today" : ""}`;
       cell.style.background = item.bg || "#ffffff";
 
-      // 处理内容：图片转img标签，换行转<br>
       let content = item.text || "";
       let html = content
-        // 匹配http/https图片链接
         .replace(/(https?:\/\/.*\.(png|jpg|jpeg|gif|webp))/gi, '<img src="$1" alt="图片">')
-        // 匹配Base64图片
         .replace(/(data:image\/.*?;base64,.*?)(\s|$)/gi, '<img src="$1" alt="图片">')
         .replace(/\n/g, "<br>");
 
@@ -489,27 +492,52 @@
     t.focus();
   }
 
-  // ========== 图片拖拽/粘贴功能（彻底修复）==========
+  // ========== 图片功能：上传+拖拽+粘贴（全兼容） ==========
+  // 1. 新增：手动上传按钮功能
+  function initFileUpload() {
+    const fileInput = document.getElementById("fileInput");
+    const textarea = document.getElementById("editText");
+    
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      // 转Base64并插入
+      const base64 = await fileToBase64(file);
+      const pos = textarea.selectionStart;
+      textarea.value = textarea.value.slice(0, pos) + base64 + "\n" + textarea.value.slice(pos);
+      textarea.selectionStart = textarea.selectionEnd = pos + base64.length + 1;
+      // 清空选择，方便再次上传
+      fileInput.value = "";
+      alert("✅ 图片已插入编辑框！");
+    });
+  }
+
+  // 2. 优化拖拽+粘贴功能
   function initDragPaste() {
     const textarea = document.getElementById("editText");
 
-    // 粘贴图片（支持微信/浏览器截图）
+    // 粘贴优化：兼容微信/截图/复制的图片
     textarea.addEventListener("paste", async (e) => {
-      const items = e.clipboardData.items;
-      for (let item of items) {
-        if (item.type.indexOf("image") !== -1) {
-          e.preventDefault();
-          const file = item.getAsFile();
-          const base64 = await fileToBase64(file);
-          // 插入到光标位置
-          const pos = textarea.selectionStart;
-          textarea.value = textarea.value.slice(0, pos) + base64 + "\n" + textarea.value.slice(pos);
-          textarea.selectionStart = textarea.selectionEnd = pos + base64.length + 1;
+      try {
+        const items = e.clipboardData.items;
+        for (let item of items) {
+          if (item.type.indexOf("image") !== -1) {
+            e.preventDefault(); // 阻止默认粘贴（避免乱码）
+            const file = item.getAsFile();
+            const base64 = await fileToBase64(file);
+            const pos = textarea.selectionStart;
+            textarea.value = textarea.value.slice(0, pos) + base64 + "\n" + textarea.value.slice(pos);
+            textarea.selectionStart = textarea.selectionEnd = pos + base64.length + 1;
+            console.log("✅ 粘贴图片成功");
+          }
         }
+      } catch (err) {
+        console.log("粘贴图片失败：", err);
+        alert("⚠️ 粘贴失败，试试上传按钮！");
       }
     });
 
-    // 拖拽图片
+    // 拖拽优化
     textarea.addEventListener("dragover", (e) => {
       e.preventDefault();
       textarea.style.borderColor = "#4285f4";
@@ -520,30 +548,37 @@
     });
 
     textarea.addEventListener("drop", async (e) => {
-      e.preventDefault();
-      textarea.style.borderColor = "#ddd";
-      const files = e.dataTransfer.files;
-      for (let file of files) {
-        if (file.type.indexOf("image") !== -1) {
-          const base64 = await fileToBase64(file);
-          const pos = textarea.selectionStart;
-          textarea.value = textarea.value.slice(0, pos) + base64 + "\n" + textarea.value.slice(pos);
-          textarea.selectionStart = textarea.selectionEnd = pos + base64.length + 1;
+      try {
+        e.preventDefault();
+        textarea.style.borderColor = "#ddd";
+        const files = e.dataTransfer.files;
+        for (let file of files) {
+          if (file.type.indexOf("image") !== -1) {
+            const base64 = await fileToBase64(file);
+            const pos = textarea.selectionStart;
+            textarea.value = textarea.value.slice(0, pos) + base64 + "\n" + textarea.value.slice(pos);
+            textarea.selectionStart = textarea.selectionEnd = pos + base64.length + 1;
+          }
         }
+        console.log("✅ 拖拽图片成功");
+      } catch (err) {
+        console.log("拖拽图片失败：", err);
+        alert("⚠️ 拖拽失败，试试上传按钮！");
       }
     });
   }
 
-  // 文件转Base64（优化版）
+  // 文件转Base64：加错误捕获
   function fileToBase64(file) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (err) => reject(err);
       reader.readAsDataURL(file);
     });
   }
 
-  // ========== 颜色同步功能 ==========
+  // ========== 颜色同步 ==========
   function initColorSync() {
     const colorPicker = document.getElementById("bgColor");
     const colorCode = document.getElementById("bgColorCode");
@@ -553,7 +588,6 @@
     });
 
     colorCode.addEventListener("input", () => {
-      // 验证颜色格式
       if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(colorCode.value)) {
         colorPicker.value = colorCode.value;
       }
@@ -570,8 +604,7 @@
     document.getElementById("bgColorCode").value = item.bg || "#ffffff";
     document.getElementById("editPanel").style.display = "block";
     document.getElementById("emojiPanel").style.display = "none";
-    // 滚动到编辑区
-    document.getElementById("editPanel").scrollIntoView({ behavior: "smooth" });
+    document.getElementById("editText").focus();
   }
 
   function saveDay() {
@@ -581,7 +614,7 @@
     dayData[currentDate] = { text, bg };
     renderCalendar();
     updateJson();
-    alert("✅ 保存成功！");
+    alert("✅ 保存成功！记得复制JSON到GitHub哦~");
   }
 
   function clearDay() {
@@ -634,7 +667,6 @@
   function openDetail(dateStr) {
     const item = dayData[dateStr] || {};
     const content = item.text || "暂无内容";
-    // 处理内容：图片转img标签，换行转<br>
     const html = content
       .replace(/(https?:\/\/.*\.(png|jpg|jpeg|gif|webp))/gi, '<img src="$1" alt="图片">')
       .replace(/(data:image\/.*?;base64,.*?)(\s|$)/gi, '<img src="$1" alt="图片">')
@@ -650,18 +682,12 @@
   }
 
   // ========== 全局事件 ==========
-  // 点击空白关闭表情面板和弹窗
   window.onclick = (e) => {
     const modal = document.getElementById("detailModal");
     const emojiPanel = document.getElementById("emojiPanel");
     const emojiBtn = document.querySelector(".emoji-btn");
 
-    // 关闭弹窗
-    if (e.target === modal) {
-      closeModal();
-    }
-
-    // 关闭表情面板
+    if (e.target === modal) closeModal();
     if (!emojiPanel.contains(e.target) && e.target !== emojiBtn) {
       emojiPanel.style.display = "none";
     }
