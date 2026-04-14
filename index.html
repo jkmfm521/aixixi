@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- 关键：强制移动端视口适配，禁止缩放 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>❤️aixixi</title>
   <style>
     * {
@@ -10,26 +11,28 @@
       padding: 0;
       box-sizing: border-box;
       font-family: "Microsoft YaHei", sans-serif;
+      -webkit-tap-highlight-color: transparent; /* 消除手机点击高亮 */
     }
     body {
-      background: #fdf5fb; /* 暖奶雾淡粉底，浪漫氛围 */
-      padding: 25px;
+      background: #fdf5fb;
+      padding: 15px 10px; /* 手机端缩小左右边距 */
+      min-height: 100vh;
     }
     .container {
-      max-width: 1200px;
+      max-width: 100%; /* 手机端100%宽度 */
       margin: 0 auto;
     }
     .header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
     .title {
-      font-size: 28px;
-      /* 粉→紫渐变标题，高级感拉满 */
+      font-size: clamp(20px, 6vw, 28px); /* 响应式字体，手机端自动缩小 */
       background: linear-gradient(90deg, #e25a99, #b760e2);
       -webkit-background-clip: text;
       color: transparent;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      line-height: 1.3;
     }
     .auth-box {
       margin: 10px 0;
@@ -57,51 +60,53 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 20px;
-      margin-bottom: 20px;
+      gap: 12px; /* 手机端缩小按钮间距 */
+      margin-bottom: 16px;
+      flex-wrap: wrap;
     }
     .toolbar button {
-      padding: 10px 18px;
+      padding: 8px 14px; /* 手机端缩小按钮内边距 */
       background: #fff;
       border: none;
       border-radius: 50px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       cursor: pointer;
       transition: all 0.2s;
+      font-size: clamp(14px, 4vw, 16px);
     }
     .toolbar button:hover {
       background: #f3e5f5;
       color: #b760e2;
     }
     #yearMonth {
-      font-size: 19px;
+      font-size: clamp(16px, 5vw, 19px); /* 响应式年月字体 */
       font-weight: bold;
-      color: #9966cc; /* 淡紫色年月，统一风格 */
+      color: #9966cc;
     }
     .week-header {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 6px; /* 手机端缩小星期条间距 */
+      margin-bottom: 8px;
     }
     .week-header div {
       text-align: center;
       font-weight: bold;
       color: #fff;
-      padding: 10px;
-      /* 粉→紫渐变星期条，视觉冲击感 */
+      padding: 8px 4px; /* 手机端缩小内边距 */
       background: linear-gradient(90deg, #e8a4d8, #d898e8);
       border-radius: 12px;
+      font-size: clamp(12px, 3.5vw, 14px); /* 响应式星期字体 */
     }
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
+      gap: 6px; /* 手机端缩小卡片间距 */
     }
     .day-cell {
       border-radius: 16px;
-      min-height: 130px;
-      padding: 12px;
+      min-height: clamp(100px, 28vw, 130px); /* 响应式卡片高度，手机端自动缩小 */
+      padding: 8px 6px; /* 手机端缩小内边距 */
       position: relative;
       box-shadow: 0 3px 10px rgba(0,0,0,0.05);
       cursor: pointer;
@@ -114,36 +119,36 @@
       box-shadow: 0 6px 16px rgba(0,0,0,0.08);
     }
     .day-cell.today {
-      border: 2px solid #e25a99; /* 玫瑰粉今天边框 */
-      box-shadow: 0 0 12px rgba(226,90,153,0.15); /* 柔光阴影 */
+      border: 2px solid #e25a99;
+      box-shadow: 0 0 12px rgba(226,90,153,0.15);
     }
     .day-header { 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      margin-bottom: 6px; 
+      margin-bottom: 4px; 
     }
     .day-number {
-      font-size: 15px;
+      font-size: clamp(13px, 4vw, 15px); /* 响应式日期数字 */
       font-weight: bold;
       color: #555;
     }
     .day-count { 
-      font-size: 11px; 
-      color: #6a8ba2; /* 雾蓝灰天数，高级柔和 */
+      font-size: clamp(10px, 3vw, 11px); /* 响应式天数字体 */
+      color: #6a8ba2;
       opacity: 0.8; 
     }
     .day-content {
-      font-size: 13px;
-      line-height: 1.4;
-      max-height: 80px;
+      font-size: clamp(11px, 3.2vw, 13px); /* 响应式内容字体，手机端自动缩小 */
+      line-height: 1.3;
+      max-height: clamp(60px, 18vw, 80px); /* 响应式内容高度 */
       overflow: hidden;
       word-break: break-all;
       color: #333;
     }
     .day-content img {
       max-width: 100%;
-      max-height: 50px;
+      max-height: clamp(40px, 12vw, 50px); /* 响应式图片高度 */
       border-radius: 4px;
       margin: 2px 0;
       display: block;
@@ -152,29 +157,30 @@
     .edit-area {
       margin-top: 20px;
       background: #fff;
-      padding: 20px;
+      padding: 16px;
       border-radius: 16px;
       display: none;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
     .edit-area h4 {
       margin-bottom: 10px;
-      color: #b760e2; /* 淡紫色标题 */
+      color: #b760e2;
+      font-size: clamp(16px, 5vw, 18px);
     }
     .tool-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 10px;
       flex-wrap: wrap;
     }
     .emoji-btn, .upload-btn {
-      padding: 6px 12px;
+      padding: 6px 10px;
       background: #f5f7fa;
       border: 1px solid #eee;
       border-radius: 50px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: clamp(12px, 3.5vw, 14px);
     }
     .upload-btn {
       background: #f3e5f5;
@@ -185,18 +191,18 @@
       display: none;
     }
     .color-input {
-      width: 60px;
-      height: 32px;
+      width: 50px;
+      height: 30px;
       border: 1px solid #ddd;
       border-radius: 50px;
       cursor: pointer;
     }
     .color-code {
-      width: 100px;
+      width: 80px;
       padding: 6px;
       border: 1px solid #ddd;
       border-radius: 50px;
-      font-size: 14px;
+      font-size: clamp(12px, 3.5vw, 14px);
     }
     .emoji-panel {
       display: none;
@@ -205,14 +211,13 @@
       background: #fff;
       border: 1px solid #eee;
       border-radius: 12px;
-      grid-template-columns: repeat(10, 1fr);
+      grid-template-columns: repeat(8, 1fr); /* 手机端减少表情列数 */
       gap: 6px;
-      max-width: 500px;
       max-height: 200px;
       overflow-y: auto;
     }
     .emoji-item {
-      font-size: 20px;
+      font-size: clamp(18px, 5vw, 20px);
       text-align: center;
       padding: 4px;
       border-radius: 6px;
@@ -227,11 +232,11 @@
       border: 1px solid #eee;
       border-radius: 12px;
       min-height: 120px;
-      font-size: 14px;
+      font-size: clamp(14px, 4vw, 14px);
       resize: vertical;
     }
     .edit-tips {
-      font-size: 12px;
+      font-size: clamp(11px, 3.2vw, 12px);
       color: #666;
       margin: 8px 0;
       padding: 8px;
@@ -242,6 +247,7 @@
       display: flex;
       gap: 10px;
       margin-top: 10px;
+      flex-wrap: wrap;
     }
     .edit-buttons button {
       padding: 8px 16px;
@@ -249,6 +255,7 @@
       cursor: pointer;
       border: none;
       transition: all 0.2s;
+      font-size: clamp(14px, 4vw, 14px);
     }
     .btn-save {
       background: linear-gradient(90deg, #e25a99, #b760e2);
@@ -274,14 +281,17 @@
       align-items: center;
       z-index: 999;
       display: none;
+      padding: 10px; /* 手机端加内边距 */
     }
     .modal-content {
       background: #fff;
-      width: 90%;
+      width: 95%; /* 手机端95%宽度 */
       max-width: 600px;
       border-radius: 16px;
-      padding: 20px;
+      padding: 16px;
       position: relative;
+      max-height: 85vh; /* 手机端限制高度 */
+      overflow-y: auto;
     }
     .modal-close {
       position: absolute;
@@ -295,7 +305,7 @@
       color: #e25a99;
     }
     .modal-date {
-      font-size: 18px;
+      font-size: clamp(16px, 5vw, 18px);
       font-weight: bold;
       margin-bottom: 15px;
       padding-bottom: 10px;
@@ -303,10 +313,8 @@
       color: #b760e2;
     }
     .modal-body {
-      font-size: 15px;
+      font-size: clamp(14px, 4vw, 15px);
       line-height: 1.6;
-      max-height: 70vh;
-      overflow-y: auto;
       color: #333;
     }
     .modal-body img {
@@ -327,17 +335,37 @@
     .admin-tools h4 {
       margin-bottom: 10px;
       color: #b760e2;
+      font-size: clamp(14px, 4vw, 16px);
     }
     pre {
       background: #f9f9f9;
       padding: 10px;
       border-radius: 8px;
-      font-size: 12px;
+      font-size: clamp(10px, 3vw, 12px);
       max-height: 200px;
       overflow-y: auto;
       border: 1px solid #eee;
       white-space: pre-wrap;
       word-break: break-all;
+    }
+
+    /* ========== 关键：手机端横屏适配优化 ========== */
+    @media (max-width: 768px) {
+      .day-cell {
+        min-height: clamp(90px, 25vw, 110px);
+        padding: 6px 4px;
+      }
+      .day-content {
+        max-height: clamp(50px, 15vw, 70px);
+      }
+      .emoji-panel {
+        grid-template-columns: repeat(10, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .emoji-panel {
+        grid-template-columns: repeat(8, 1fr);
+      }
     }
   </style>
 </head>
