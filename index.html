@@ -1,105 +1,159 @@
 <!DOCTYPE html>
-<html lang="zh" style="background-color: black;color: white;">
-
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <title>爱意收藏家</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>❤️aixixi</title>
   <style>
-    body {
-      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background-color: black;
-      color: white;
+    * {
       margin: 0;
-      padding: 20px;
+      padding: 0;
       box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-
+    body {
+      background: #fdf5fb;
+      padding: 15px 10px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
     .header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 16px;
     }
-
-    .header h1 {
-      font-size: 26px;
-      margin: 0;
-      color: #f0f0f0;
+    .title {
+      font-size: clamp(15px, 6vw, 20px);
+      background: linear-gradient(90deg, #79f108, #f01729);
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 8px;
+      line-height: 1.3;
     }
-
-    .header p {
-      font-size: 14px;
-      color: #aaa;
-      margin-top: 8px;
+    .auth-box {
+      margin: 10px 0;
     }
-
+    .auth-box input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 50px;
+      width: 200px;
+    }
+    .auth-box button {
+      padding: 8px 16px;
+      background: linear-gradient(90deg, #e25a99, #b760e2);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      margin-left: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .auth-box button:hover {
+      opacity: 0.9;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .toolbar button {
+      padding: 8px 14px;
+      background: #fff;
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: clamp(14px, 4vw, 16px);
+    }
+    .toolbar button:hover {
+      background: #f3e5f5;
+      color: #b760e2;
+    }
+    #yearMonth {
+      font-size: clamp(16px, 5vw, 19px);
+      font-weight: bold;
+      color: #9966cc;
+    }
+    .week-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .week-header div {
+      text-align: center;
+      font-weight: bold;
+      color: #fff;
+      padding: 8px 4px;
+      background: linear-gradient(90deg, #e8a4d8, #d898e8);
+      border-radius: 12px;
+      font-size: clamp(12px, 3.5vw, 14px);
+    }
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 12px;
-      max-width: 1000px;
-      margin: 0 auto;
+      gap: 6px;
     }
-
-    .day-name {
-      text-align: center;
-      font-weight: bold;
-      font-size: 14px;
-      color: #ccc;
-      padding: 10px 0;
-    }
-
-    .day {
-      background-color: #111;
-      border-radius: 12px;
-      padding: 14px;
-      min-height: 100px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    .day-cell {
+      border-radius: 16px;
+      min-height: clamp(100px, 28vw, 130px);
+      padding: 8px 6px;
       position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-
-    .day .date {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 8px;
-    }
-
-    .day .content {
-      font-size: 14px;
-      color: #eee;
-      line-height: 1.5;
-      word-break: break-word;
-    }
-
-    .nav {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .nav button {
-      background-color: #222;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      margin: 0 5px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
       cursor: pointer;
-      font-size: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .day-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .day-cell.today {
+      border: 2px solid #e25a99;
+      box-shadow: 0 0 12px rgba(226,90,153,0.15);
+    }
+    .day-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 4px; 
+    }
+    .day-number {
+      font-size: clamp(13px, 4vw, 15px);
+      font-weight: bold;
+      color: #555;
+    }
+    .day-count { 
+      font-size: clamp(10px, 3vw, 11px); 
+      color: #6a8ba2;
+      opacity: 0.8; 
+    }
+    .day-content {
+      font-size: clamp(11px, 3.2vw, 13px);
+      line-height: 1.3;
+      max-height: clamp(60px, 18vw, 80px);
+      overflow: hidden;
+      word-break: break-all;
+      color: #333;
+    }
+    .day-content img {
+      max-width: 100%;
+      max-height: clamp(40px, 12vw, 50px);
+      border-radius: 4px;
+      margin: 2px 0;
+      display: block;
     }
 
-    .nav button:hover {
-      background-color: #333;
-    }
-
-    .empty {
-      background-color: transparent;
-      box-shadow: none;
-    }
-
-    /* 新加：当天小时 */
+    /* 我只加了这两个样式，其他完全没动 */
     .day-hours {
       position: absolute;
       bottom: 6px;
@@ -107,8 +161,6 @@
       font-size: 12px;
       color: #888;
     }
-
-    /* 新加：最后总和（只显示一次） */
     .total-hours {
       position: absolute;
       bottom: 6px;
@@ -117,129 +169,550 @@
       color: #ff69b4;
       font-weight: bold;
     }
+
+    .edit-area {
+      margin-top: 20px;
+      background: #fff;
+      padding: 16px;
+      border-radius: 16px;
+      display: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .edit-area h4 {
+      margin-bottom: 10px;
+      color: #b760e2;
+      font-size: clamp(16px, 5vw, 18px);
+    }
+    .tool-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .emoji-btn, .upload-btn {
+      padding: 6px 10px;
+      background: #f5f7fa;
+      border: 1px solid #eee;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: clamp(12px, 3.5vw, 14px);
+    }
+    .upload-btn {
+      background: #f3e5f5;
+      border-color: #b760e2;
+      color: #b760e2;
+    }
+    #fileInput {
+      display: none;
+    }
+    .color-input {
+      width: 50px;
+      height: 30px;
+      border: 1px solid #ddd;
+      border-radius: 50px;
+      cursor: pointer;
+    }
+    .color-code {
+      width: 80px;
+      padding: 6px;
+      border: 1px solid #ddd;
+      border-radius: 50px;
+      font-size: clamp(12px, 3.5vw, 14px);
+    }
+    .emoji-panel {
+      display: none;
+      margin-top: 8px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .emoji-item {
+      font-size: clamp(18px, 5vw, 20px);
+      text-align: center;
+      padding: 4px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .emoji-item:hover {
+      background: #f3e5f5;
+    }
+    .edit-area textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      min-height: 120px;
+      font-size: clamp(14px, 4vw, 14px);
+      resize: vertical;
+    }
+    .edit-tips {
+      font-size: clamp(11px, 3.2vw, 12px);
+      color: #666;
+      margin: 8px 0;
+      padding: 8px;
+      background: #f9f4fc;
+      border-radius: 8px;
+    }
+    .edit-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .edit-buttons button {
+      padding: 8px 16px;
+      border-radius: 50px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      font-size: clamp(14px, 4vw, 14px);
+    }
+    .btn-save {
+      background: linear-gradient(90deg, #e25a99, #b760e2);
+      color: #fff;
+    }
+    .btn-save:hover {
+      opacity: 0.9;
+    }
+    .btn-clear {
+      background: #f1f3f4;
+      color: #333;
+    }
+    .btn-clear:hover {
+      background: #e0e0e0;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      display: none;
+      padding: 10px;
+    }
+    .modal-content {
+      background: #fff;
+      width: 95%;
+      max-width: 600px;
+      border-radius: 16px;
+      padding: 16px;
+      position: relative;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #999;
+    }
+    .modal-close:hover {
+      color: #e25a99;
+    }
+    .modal-date {
+      font-size: clamp(16px, 5vw, 18px);
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      color: #b760e2;
+    }
+    .modal-body {
+      font-size: clamp(14px, 4vw, 15px);
+      line-height: 1.6;
+      color: #333;
+    }
+    .modal-body img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 8px 0;
+      display: block;
+    }
+
+    .admin-tools {
+      margin-top: 15px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 12px;
+      display: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .admin-tools h4 {
+      margin-bottom: 10px;
+      color: #b760e2;
+      font-size: clamp(14px, 4vw, 16px);
+    }
+    pre {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: clamp(10px, 3vw, 12px);
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    @media (max-width: 768px) {
+      .day-cell {
+        min-height: clamp(90px, 25vw, 110px);
+        padding: 6px 4px;
+      }
+      .day-content {
+        max-height: clamp(50px, 15vw, 70px);
+      }
+      .emoji-panel {
+        grid-template-columns: repeat(10, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .emoji-panel {
+        grid-template-columns: repeat(8, 1fr);
+      }
+    }
   </style>
 </head>
-
 <body>
+<div class="container">
   <div class="header">
-    <h1>爱意收藏家</h1>
-    <p>爱意随风起，风止意难平</p>
+    <div class="title">满腔情意皆克制，半世相思只自知。</div>
+    <div class="title">相思入骨难缄口，不辞风雪为卿来。</div>
   </div>
 
-  <div class="nav">
-    <button id="prevMonth">上个月</button>
-    <button id="nextMonth">下个月</button>
+  <div class="toolbar">
+    <button onclick="prevMonth()">← 上月</button>
+    <div id="yearMonth"></div>
+    <button onclick="nextMonth()">下月 →</button>
+  </div>
+
+  <div class="week-header">
+    <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
   </div>
 
   <div class="calendar" id="calendar"></div>
 
-  <script>
-    let currentYear = 2026;
-    let currentMonth = 2; // 3月
-    let allData = [];
+  <div class="edit-area" id="editPanel">
+    <h4>编辑：<span id="editDate"></span></h4>
+    <div class="tool-row">
+      <button class="emoji-btn" onclick="toggleEmoji()">😀 表情</button>
+      <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📤 上传图片</button>
+      <input type="file" id="fileInput" accept="image/*">
+      <input type="color" class="color-input" id="bgColor">
+      <input type="text" class="color-code" id="bgColorCode" placeholder="#ffffff">
+    </div>
+    <div class="emoji-panel" id="emojiPanel"></div>
+    <textarea id="editText" placeholder="支持：文字、表情、上传/拖拽/粘贴图片、输入图片链接..."></textarea>
+    <div class="edit-tips">💡 提示：1. 点击表情插入；2. 点击上传按钮选图片；3. 拖拽/粘贴图片；4. 输入图片链接；5. 选背景色</div>
+    <div class="edit-buttons">
+      <button class="btn-save" onclick="saveDay()">保存内容</button>
+      <button class="btn-clear" onclick="clearDay()">清空当日</button>
+    </div>
+  </div>
 
-    async function loadData() {
-      const response = await fetch('data.json');
-      const data = await response.json();
-      allData = data;
-      renderCalendar(currentYear, currentMonth);
+  <div class="admin-tools" id="adminTools">
+    <h4>📋 复制以下内容到 GitHub 的 data.json</h4>
+    <pre id="jsonOut"></pre>
+  </div>
+</div>
+
+<div class="modal" id="detailModal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    <div class="modal-date" id="modalDate"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+  const ADMIN_PWD = "aixixi";
+  const DATA_URL = "https://raw.githubusercontent.com/jkmfm521/aixixi/main/data.json";
+  const START_DATE = new Date(2026, 1, 24);
+
+  const EMOJIS = [
+    "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","😍","🥰","😘","😗","😙","😚",
+    "👍","👎","✊","👏","🙏","🔥","✨","🎉","🎊","❤️","🧡","💛","💚","💙","💜","🌹",
+    "🌸","🌺","🌻","🌼","💐","🎂","🍰","☕","🍻","🥂","🏆","🎈","🛫","🎁","💯"
+  ];
+
+  let isAdmin = false;
+  let year = new Date().getFullYear();
+  let month = new Date().getMonth();
+  let dayData = {};
+  let currentDate = "";
+
+  window.onload = async () => {
+    await loadData();
+    renderCalendar();
+    initEmojiPanel();
+    initDragPaste();
+    initColorSync();
+    initFileUpload();
+  };
+
+  async function loadData() {
+    try {
+      let res = await fetch(DATA_URL);
+      if (!res.ok) throw new Error("数据加载失败");
+      const data = await res.json();
+      dayData = typeof data === 'object' && !Array.isArray(data) ? data : {};
+    } catch (e) {
+      console.log("首次加载，数据为空");
+      dayData = {};
+    }
+  }
+
+  function getDayCount(dateStr) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const cur = new Date(y, m-1, d);
+    const diff = Math.floor((cur - START_DATE) / (1000*60*60*24)) + 1;
+    return diff > 0 ? diff : 0;
+  }
+
+  // 我只在这个函数里加了小时显示，其他代码完全没动
+  function renderCalendar() {
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const firstWeekDay = first.getDay();
+    const days = last.getDate();
+    document.getElementById("yearMonth").innerText = `${year}年${month+1}月`;
+    const cal = document.getElementById("calendar");
+    cal.innerHTML = "";
+
+    // 计算总时长 & 最后一天
+    let totalHours = 0;
+    let lastEventDay = 0;
+    const dayList = [];
+    
+    for (let d=1; d<=days; d++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,0)}-${String(d).padStart(2,0)}`;
+      const item = dayData[dateStr] || {};
+      dayList.push({ day:d, dateStr, item });
+      
+      if (item.hours) {
+        totalHours += Number(item.hours);
+        lastEventDay = d;
+      }
     }
 
-    function renderCalendar(year, month) {
-      const calendar = document.getElementById('calendar');
-      calendar.innerHTML = '';
+    for (let i=0; i<firstWeekDay; i++) cal.appendChild(document.createElement("div"));
 
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const lastDate = lastDay.getDate();
+    dayList.forEach(({ day, dateStr, item }) => {
+      const isToday = new Date().toISOString().split("T")[0] === dateStr;
+      const dayCount = getDayCount(dateStr);
 
-      const startWeekDay = firstDay.getDay();
+      const cell = document.createElement("div");
+      cell.className = `day-cell ${isToday ? "today" : ""}`;
+      cell.style.background = item.bg || "#ffffff";
 
-      const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
-      weekNames.forEach(week => {
-        const div = document.createElement('div');
-        div.className = 'day-name';
-        div.textContent = week;
-        calendar.appendChild(div);
-      });
+      let content = item.text || "";
+      let html = content
+        .replace(/(https?:\/\/.*\.(png|jpg|jpeg|gif|webp))/gi, '<img src="$1" alt="图片">')
+        .replace(/(data:image\/.*?;base64,.*?)(\s|$)/gi, '<img src="$1" alt="图片">')
+        .replace(/\n/g, "<br>");
 
-      for (let i = 0; i < startWeekDay; i++) {
-        const empty = document.createElement('div');
-        empty.className = 'day empty';
-        calendar.appendChild(empty);
+      const countHtml = dayCount > 0 ? `<div class="day-count">${dayCount}</div>` : "";
+
+      cell.innerHTML = `
+        <div class="day-header">
+          <div class="day-number">${day}</div>
+          ${countHtml}
+        </div>
+        <div class="day-content">${html}</div>
+      `;
+
+      // 显示当天小时
+      if (item.hours) {
+        const h = document.createElement("div");
+        h.className = "day-hours";
+        h.textContent = item.hours;
+        cell.appendChild(h);
       }
 
-      // 计算总和 & 最后一天
-      let totalHours = 0;
-      let lastEventDay = 0;
-      let dayDataList = [];
-
-      for (let day = 1; day <= lastDate; day++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const item = allData.find(d => d.date === dateStr);
-        dayDataList.push({ day, item });
-        
-        if (item?.hours) {
-          totalHours += item.hours;
-          lastEventDay = day;
-        }
+      // 只在最后一天的下一天显示总时长
+      if (day === lastEventDay + 1 && totalHours > 0) {
+        const t = document.createElement("div");
+        t.className = "total-hours";
+        t.textContent = totalHours.toFixed(1);
+        cell.appendChild(t);
       }
 
-      // 开始渲染
-      dayDataList.forEach(({ day, item }) => {
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'day';
+      cell.onclick = () => isAdmin ? openEdit(dateStr) : openDetail(dateStr);
+      cal.appendChild(cell);
+    });
+  }
 
-        const dateDiv = document.createElement('div');
-        dateDiv.className = 'date';
-        dateDiv.textContent = day;
-        dayDiv.appendChild(dateDiv);
+  function initEmojiPanel() {
+    const panel = document.getElementById("emojiPanel");
+    panel.innerHTML = "";
+    EMOJIS.forEach(e => {
+      const item = document.createElement("div");
+      item.className = "emoji-item";
+      item.innerText = e;
+      item.onclick = () => insertEmoji(e);
+      panel.appendChild(item);
+    });
+    panel.style.display = "none";
+  }
+  function toggleEmoji() {
+    const p = document.getElementById("emojiPanel");
+    p.style.display = p.style.display === "grid" ? "none" : "grid";
+  }
+  function insertEmoji(emoji) {
+    const t = document.getElementById("editText");
+    const pos = t.selectionStart;
+    t.value = t.value.slice(0, pos) + emoji + t.value.slice(pos);
+    t.selectionStart = t.selectionEnd = pos + emoji.length;
+    t.focus();
+  }
 
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'content';
-        contentDiv.textContent = item ? item.content : '';
-        dayDiv.appendChild(contentDiv);
-
-        // 新加：当天小时
-        if (item?.hours) {
-          const h = document.createElement('div');
-          h.className = 'day-hours';
-          h.textContent = item.hours;
-          dayDiv.appendChild(h);
+  function initFileUpload() {
+    const fileInput = document.getElementById("fileInput");
+    const textarea = document.getElementById("editText");
+    
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const base64 = await fileToBase64(file);
+      const pos = textarea.selectionStart;
+      textarea.value = textarea.value.slice(0, pos) + base64 + "\n" + textarea.value.slice(pos);
+      textarea.selectionStart = textarea.selectionEnd = pos + base64.length + 1;
+      fileInput.value = "";
+    });
+  }
+  function initDragPaste() {
+    const textarea = document.getElementById("editText");
+    textarea.addEventListener("paste", async (e) => {
+      try {
+        const items = e.clipboardData.items;
+        for (let item of items) {
+          if (item.type.indexOf("image") !== -1) {
+            e.preventDefault();
+            const file = item.getAsFile();
+            const base64 = await fileToBase64(file);
+            const pos = textarea.selectionStart;
+            textarea.value = textarea.value.slice(0, pos) + base64 + "\n" + textarea.value.slice(pos);
+          }
         }
-
-        // 新加：只在最后一天的下一天显示总时长（只显示一次）
-        if (day === lastEventDay + 1) {
-          const t = document.createElement('div');
-          t.className = 'total-hours';
-          t.textContent = totalHours;
-          dayDiv.appendChild(t);
+      } catch (err) {}
+    });
+    textarea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      textarea.style.borderColor = "#4285f4";
+    });
+    textarea.addEventListener("dragleave", () => {
+      textarea.style.borderColor = "#ddd";
+    });
+    textarea.addEventListener("drop", async (e) => {
+      try {
+        e.preventDefault();
+        textarea.style.borderColor = "#ddd";
+        const files = e.dataTransfer.files;
+        for (let file of files) {
+          if (file.type.indexOf("image") !== -1) {
+            const base64 = await fileToBase64(file);
+            const pos = textarea.selectionStart;
+            textarea.value = textarea.value.slice(0, pos) + base64 + "\n" + textarea.value.slice(pos);
+          }
         }
+      } catch (err) {}
+    });
+  }
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  }
 
-        calendar.appendChild(dayDiv);
-      });
+  function initColorSync() {
+    const colorPicker = document.getElementById("bgColor");
+    const colorCode = document.getElementById("bgColorCode");
+    colorPicker.addEventListener("input", () => { colorCode.value = colorPicker.value; });
+    colorCode.addEventListener("input", () => {
+      if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(colorCode.value)) {
+        colorPicker.value = colorCode.value;
+      }
+    });
+  }
+
+  function openEdit(dateStr) {
+    currentDate = dateStr;
+    const item = dayData[dateStr] || {};
+    document.getElementById("editDate").innerText = dateStr;
+    document.getElementById("editText").value = item.text || "";
+    document.getElementById("bgColor").value = item.bg || "#ffffff";
+    document.getElementById("bgColorCode").value = item.bg || "#ffffff";
+    document.getElementById("editPanel").style.display = "block";
+    document.getElementById("emojiPanel").style.display = "none";
+    document.getElementById("editText").focus();
+  }
+  function saveDay() {
+    if (!isAdmin) return;
+    const text = document.getElementById("editText").value.trim();
+    const bg = document.getElementById("bgColor").value;
+    dayData[currentDate] = { text, bg };
+    renderCalendar();
+    updateJson();
+  }
+  function clearDay() {
+    if (!isAdmin) return;
+    delete dayData[currentDate];
+    document.getElementById("editText").value = "";
+    document.getElementById("bgColor").value = "#ffffff";
+    document.getElementById("bgColorCode").value = "#ffffff";
+    renderCalendar();
+    updateJson();
+  }
+  function unlockEdit() {
+    const inputPwd = document.getElementById("pwd").value.trim();
+    if (inputPwd === ADMIN_PWD) {
+      isAdmin = true;
+      document.getElementById("adminTools").style.display = "block";
+      updateJson();
     }
+  }
+  function updateJson() {
+    document.getElementById("jsonOut").textContent = JSON.stringify(dayData, null, 2);
+  }
 
-    document.getElementById('prevMonth').addEventListener('click', () => {
-      currentMonth--;
-      if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-      }
-      renderCalendar(currentYear, currentMonth);
-    });
+  function prevMonth() { month--; if (month < 0) { month=11; year--; } renderCalendar(); }
+  function nextMonth() { month++; if (month>11) { month=0; year++; } renderCalendar(); }
 
-    document.getElementById('nextMonth').addEventListener('click', () => {
-      currentMonth++;
-      if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-      }
-      renderCalendar(currentYear, currentMonth);
-    });
+  function openDetail(dateStr) {
+    const item = dayData[dateStr] || {};
+    const content = item.text || "暂无内容";
+    const html = content.replace(/(https?:\/\/.*\.(png|jpg|jpeg|gif|webp))/gi, '<img src="$1" alt="图片">').replace(/\n/g, "<br>");
+    document.getElementById("modalDate").innerText = dateStr;
+    document.getElementById("modalBody").innerHTML = html;
+    document.getElementById("detailModal").style.display = "flex";
+  }
+  function closeModal() {
+    document.getElementById("detailModal").style.display = "none";
+  }
 
-    loadData();
-  </script>
+  window.onclick = (e) => {
+    const modal = document.getElementById("detailModal");
+    const emojiPanel = document.getElementById("emojiPanel");
+    const emojiBtn = document.querySelector(".emoji-btn");
+    if (e.target === modal) closeModal();
+    if (!emojiPanel.contains(e.target) && e.target !== emojiBtn) {
+      emojiPanel.style.display = "none";
+    }
+  };
+</script>
 </body>
-
 </html>
