@@ -77,10 +77,18 @@
       background: #f3e5f5;
       color: #b760e2;
     }
+    .year-month-container {
+      text-align: center;
+    }
     #yearMonth {
       font-size: clamp(16px, 5vw, 19px);
       font-weight: bold;
       color: #9966cc;
+    }
+    .month-stats {
+      font-size: clamp(11px, 3.5vw, 13px);
+      color: #9966cc;
+      margin-top: 4px;
     }
     .week-header {
       display: grid;
@@ -393,7 +401,10 @@
 
   <div class="toolbar">
     <button onclick="prevMonth()">← 上月</button>
-    <div id="yearMonth"></div>
+    <div class="year-month-container">
+      <div id="yearMonth"></div>
+      <div class="month-stats" id="monthStats"></div>
+    </div>
     <button onclick="nextMonth()">下月 →</button>
   </div>
 
@@ -454,7 +465,7 @@
 
   // 预计算所有历史总时长
   let totalAllHours = 0;
-  let lastEventDate = null;
+  let lastEventNextDayStr = null; // 存储最后一次见面的下一天
 
   window.onload = async () => {
     await loadData();
@@ -479,7 +490,7 @@
     }
   }
 
-  // 预计算全局总时长和最后一次见面日期
+  // 预计算全局总时长和最后一次见面的下一天
   function preCalculateTotalHours() {
     totalAllHours = 0;
     let maxDateStr = null;
@@ -492,8 +503,11 @@
         }
       }
     }
+    // 计算最后一次见面的下一天
     if (maxDateStr) {
-      lastEventDate = new Date(maxDateStr);
+      const lastDate = new Date(maxDateStr);
+      lastDate.setDate(lastDate.getDate() + 1);
+      lastEventNextDayStr = lastDate.toISOString().split('T')[0];
     }
   }
 
@@ -510,6 +524,26 @@
     const firstWeekDay = first.getDay();
     const days = last.getDate();
     document.getElementById("yearMonth").innerText = `${year}年${month+1}月`;
+
+    // 计算当月统计数据
+    let monthMeetCount = 0;
+    let monthHoursSum = 0;
+    for (const dateStr in dayData) {
+      const d = new Date(dateStr);
+      if (d.getFullYear() === year && d.getMonth() === month) {
+        const item = dayData[dateStr];
+        // 见面次数：有bg的条数
+        if (item.bg) {
+          monthMeetCount++;
+        }
+        // 见面时间：hours的总和
+        if (item.hours) {
+          monthHoursSum += Number(item.hours);
+        }
+      }
+    }
+    document.getElementById("monthStats").innerText = `总天数: ${days} | 见面: ${monthMeetCount}次 | 时长: ${monthHoursSum.toFixed(1)}h`;
+
     const cal = document.getElementById("calendar");
     cal.innerHTML = "";
 
@@ -549,17 +583,12 @@
         cell.appendChild(h);
       }
 
-      // 只在最后一次见面的后一天显示全局总时长
-      if (lastEventDate) {
-        const displayDate = new Date(year, month, d);
-        const nextDay = new Date(lastEventDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-        if (displayDate.toDateString() === nextDay.toDateString() && totalAllHours > 0) {
-          const t = document.createElement("div");
-          t.className = "total-hours";
-          t.textContent = totalAllHours.toFixed(1);
-          cell.appendChild(t);
-        }
+      // 只在最后一次见面的下一天显示全局总时长
+      if (dateStr === lastEventNextDayStr && totalAllHours > 0) {
+        const t = document.createElement("div");
+        t.className = "total-hours";
+        t.textContent = totalAllHours.toFixed(1);
+        cell.appendChild(t);
       }
 
       cell.onclick = () => isAdmin ? openEdit(dateStr) : openDetail(dateStr);
