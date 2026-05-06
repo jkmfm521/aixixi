@@ -178,6 +178,23 @@
       font-weight: bold;
     }
 
+    /* 麻将输赢样式 新增 */
+    .day-mj {
+      position: absolute;
+      bottom: 6px;
+      left: 8px;
+      font-size: 12px;
+      color: #555;
+    }
+    .total-mj {
+      position: absolute;
+      bottom: 6px;
+      left: 8px;
+      font-size: 13px;
+      color: #ff69b4;
+      font-weight: bold;
+    }
+
     .edit-area {
       margin-top: 20px;
       background: #fff;
@@ -465,12 +482,17 @@
 
   // 预计算所有历史总时长
   let totalAllHours = 0;
-  let lastEventNextDayStr = null; // 存储最后一次见面的下一天
+  let lastEventNextDayStr = null;
+
+  // 麻将全局统计 新增
+  let totalXi = 0;
+  let totalDong = 0;
+  let lastMjNextDayStr = null;
 
   window.onload = async () => {
     await loadData();
-    // 预计算全局总时长和最后一次见面日期
     preCalculateTotalHours();
+    preCalculateMjTotal(); // 新增
     renderCalendar();
     initEmojiPanel();
     initDragPaste();
@@ -490,7 +512,7 @@
     }
   }
 
-  // 预计算全局总时长和最后一次见面的下一天
+  // 预计算总时长
   function preCalculateTotalHours() {
     totalAllHours = 0;
     let maxDateStr = null;
@@ -503,11 +525,34 @@
         }
       }
     }
-    // 计算最后一次见面的下一天
     if (maxDateStr) {
       const lastDate = new Date(maxDateStr);
       lastDate.setDate(lastDate.getDate() + 1);
       lastEventNextDayStr = lastDate.toISOString().split('T')[0];
+    }
+  }
+
+  // 预计算麻将全局输赢 新增
+  function preCalculateMjTotal() {
+    totalXi = 0;
+    totalDong = 0;
+    let lastMjDate = null;
+    for (const dateStr in dayData) {
+      const item = dayData[dateStr];
+      if (item.x !== undefined && item.d !== undefined) {
+        const x = Number(item.x);
+        const d = Number(item.d);
+        totalXi += x;
+        totalDong += d;
+        if (!lastMjDate || new Date(dateStr) > new Date(lastMjDate)) {
+          lastMjDate = dateStr;
+        }
+      }
+    }
+    if (lastMjDate) {
+      const nd = new Date(lastMjDate);
+      nd.setDate(nd.getDate() + 1);
+      lastMjNextDayStr = nd.toISOString().split('T')[0];
     }
   }
 
@@ -525,24 +570,35 @@
     const days = last.getDate();
     document.getElementById("yearMonth").innerText = `${year}年${month+1}月`;
 
-    // 计算当月统计数据
+    // 原有月份统计
     let monthMeetCount = 0;
     let monthHoursSum = 0;
+
+    // 新增：当月麻将统计
+    let monthMjCount = 0;
+    let monthXi = 0;
+    let monthDong = 0;
+
     for (const dateStr in dayData) {
       const d = new Date(dateStr);
       if (d.getFullYear() === year && d.getMonth() === month) {
         const item = dayData[dateStr];
-        // 见面次数：有bg的条数
-        if (item.bg) {
-          monthMeetCount++;
-        }
-        // 见面时间：hours的总和
-        if (item.hours) {
-          monthHoursSum += Number(item.hours);
+        if (item.bg) monthMeetCount++;
+        if (item.hours) monthHoursSum += Number(item.hours);
+        // 麻将
+        if (item.x !== undefined && item.d !== undefined) {
+          monthMjCount++;
+          monthXi += Number(item.x);
+          monthDong += Number(item.d);
         }
       }
     }
-    document.getElementById("monthStats").innerText = `总天数: ${days} | 见面: ${monthMeetCount}次 | 时长: ${monthHoursSum.toFixed(1)}h`;
+
+    // 显示两行统计
+    document.getElementById("monthStats").innerHTML = `
+      总天数: ${days} | 见面: ${monthMeetCount}次 | 时长: ${monthHoursSum.toFixed(1)}h <br>
+      麻将: ${monthMjCount}次 | 西:${monthXi} | 咚:${monthDong}
+    `;
 
     const cal = document.getElementById("calendar");
     cal.innerHTML = "";
@@ -583,12 +639,28 @@
         cell.appendChild(h);
       }
 
-      // 只在最后一次见面的下一天显示全局总时长
+      // 当天麻将 新增
+      if (item.x !== undefined && item.d !== undefined) {
+        const m = document.createElement("div");
+        m.className = "day-mj";
+        m.textContent = `西:${item.x} 咚:${item.d}`;
+        cell.appendChild(m);
+      }
+
+      // 总时长
       if (dateStr === lastEventNextDayStr && totalAllHours > 0) {
         const t = document.createElement("div");
         t.className = "total-hours";
         t.textContent = totalAllHours.toFixed(1);
         cell.appendChild(t);
+      }
+
+      // 全局麻将累计 新增
+      if (dateStr === lastMjNextDayStr) {
+        const mt = document.createElement("div");
+        mt.className = "total-mj";
+        mt.textContent = `西:${totalXi} 咚:${totalDong}`;
+        cell.appendChild(mt);
       }
 
       cell.onclick = () => isAdmin ? openEdit(dateStr) : openDetail(dateStr);
@@ -708,8 +780,8 @@
     const text = document.getElementById("editText").value.trim();
     const bg = document.getElementById("bgColor").value;
     dayData[currentDate] = { text, bg };
-    // 保存后重新预计算
     preCalculateTotalHours();
+    preCalculateMjTotal();
     renderCalendar();
     updateJson();
   }
@@ -719,8 +791,8 @@
     document.getElementById("editText").value = "";
     document.getElementById("bgColor").value = "#ffffff";
     document.getElementById("bgColorCode").value = "#ffffff";
-    // 保存后重新预计算
     preCalculateTotalHours();
+    preCalculateMjTotal();
     renderCalendar();
     updateJson();
   }
