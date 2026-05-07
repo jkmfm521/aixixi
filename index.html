@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>❤️aixixi1</title>
+  <title>❤️aixixi</title>
   <style>
     * {
       margin: 0;
@@ -637,7 +637,7 @@
         cell.appendChild(h);
       }
 
-      // 当天麻将
+      // 当天麻将（只在有数据的日期显示普通样式）
       if (item.x !== undefined && item.d !== undefined) {
         const m = document.createElement("div");
         m.className = "day-mj";
@@ -645,7 +645,7 @@
         cell.appendChild(m);
       }
 
-      // 总时长
+      // 总时长（只在下一天显示）
       if (dateStr === lastEventNextDayStr && totalAllHours > 0) {
         const t = document.createElement("div");
         t.className = "total-hours";
@@ -653,8 +653,8 @@
         cell.appendChild(t);
       }
 
-      // 全局麻将累计（只在下一天显示）
-      if (dateStr === lastMjNextDayStr) {
+      // 全局麻将累计（只在下一天显示，且和当天数据互斥）
+      if (dateStr === lastMjNextDayStr && !(item.x !== undefined && item.d !== undefined)) {
         const mt = document.createElement("div");
         mt.className = "total-mj";
         mt.textContent = `西:${totalXi} 咚:${totalDong}`;
