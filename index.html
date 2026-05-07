@@ -532,31 +532,25 @@
     }
   }
 
-  // ✅ 重写：计算全局麻将累计和最后一次麻将的下一天
+  // 预计算麻将全局输赢
   function preCalculateMjTotal() {
     totalXi = 0;
     totalDong = 0;
     let lastMjDate = null;
-
-    // 遍历所有日期，找到最后一次麻将，并累加输赢
     for (const dateStr in dayData) {
       const item = dayData[dateStr];
       if (item.x !== undefined && item.d !== undefined) {
         totalXi += Number(item.x);
         totalDong += Number(item.d);
-        
         const current = new Date(dateStr);
         if (!lastMjDate || current > new Date(lastMjDate)) {
           lastMjDate = dateStr;
         }
       }
     }
-
-    // 计算：最后一次麻将的 下一天
-    lastMjNextDayStr = null;
     if (lastMjDate) {
       const nextDay = new Date(lastMjDate);
-      nextDay.setDate(nextDay.getDate() + 1); // +1天 = 明天
+      nextDay.setDate(nextDay.getDate() + 1);
       lastMjNextDayStr = nextDay.toISOString().split('T')[0];
     }
   }
@@ -639,25 +633,24 @@
         cell.appendChild(h);
       }
 
-      // ✅ 当天麻将（只在当天显示，普通黑色文字）
-      const hasMjToday = item.x !== undefined && item.d !== undefined;
-      if (hasMjToday) {
+      // 当天麻将（只在当天显示）
+      if (item.x !== undefined && item.d !== undefined) {
         const m = document.createElement("div");
         m.className = "day-mj";
         m.textContent = `西:${item.x} 咚:${item.d}`;
         cell.appendChild(m);
       }
 
-      // 总时长
-      if (dateStr === lastEventNextDayStr && totalAllHours > 0) {
+      // 总时长（和麻将互斥）
+      if (dateStr === lastEventNextDayStr && totalAllHours > 0 && !(item.hours)) {
         const t = document.createElement("div");
         t.className = "total-hours";
         t.textContent = totalAllHours.toFixed(1);
         cell.appendChild(t);
       }
 
-      // ✅ 全局累计：只在【最后一次麻将的下一天】显示，且当天没有麻将数据（粉色加粗）
-      if (dateStr === lastMjNextDayStr && !hasMjToday) {
+      // ✅ 全局麻将（只在下一天显示，和当天麻将数据互斥，和总时长也互斥）
+      if (dateStr === lastMjNextDayStr && !(item.x !== undefined && item.d !== undefined)) {
         const mt = document.createElement("div");
         mt.className = "total-mj";
         mt.textContent = `西:${totalXi} 咚:${totalDong}`;
