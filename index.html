@@ -637,7 +637,7 @@
         cell.appendChild(h);
       }
 
-      // 当天麻将（只在有数据的日期显示普通样式）
+      // 当天麻将数据（只在有x和d的日期显示）
       if (item.x !== undefined && item.d !== undefined) {
         const m = document.createElement("div");
         m.className = "day-mj";
@@ -653,7 +653,7 @@
         cell.appendChild(t);
       }
 
-      // 全局麻将累计（只在下一天显示，且和当天数据互斥）
+      // 全局麻将累计（只在下一天显示，且当天没有麻将数据）
       if (dateStr === lastMjNextDayStr && !(item.x !== undefined && item.d !== undefined)) {
         const mt = document.createElement("div");
         mt.className = "total-mj";
