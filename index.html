@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>❤️aixixi1</title>
+  <title>❤️aixixi</title>
   <style>
     * {
       margin: 0;
@@ -480,7 +480,7 @@
   let dayData = {};
   let currentDate = "";
 
-  // 预计算所有历史总时长
+  // 总时长
   let totalAllHours = 0;
   let lastEventNextDayStr = null;
 
@@ -532,27 +532,32 @@
     }
   }
 
-  // 预计算麻将全局输赢
+  // ✅ 重写：正确计算最后一次麻将的【下一天】
   function preCalculateMjTotal() {
     totalXi = 0;
     totalDong = 0;
     let lastMjDate = null;
+
+    // 遍历所有日期，找到最后一次麻将
     for (const dateStr in dayData) {
       const item = dayData[dateStr];
       if (item.x !== undefined && item.d !== undefined) {
-        const x = Number(item.x);
-        const d = Number(item.d);
-        totalXi += x;
-        totalDong += d;
-        if (!lastMjDate || new Date(dateStr) > new Date(lastMjDate)) {
+        totalXi += Number(item.x);
+        totalDong += Number(item.d);
+        
+        const current = new Date(dateStr);
+        if (!lastMjDate || current > new Date(lastMjDate)) {
           lastMjDate = dateStr;
         }
       }
     }
+
+    // 计算：最后一次麻将的 下一天
+    lastMjNextDayStr = null;
     if (lastMjDate) {
-      const nd = new Date(lastMjDate);
-      nd.setDate(nd.getDate() + 1);
-      lastMjNextDayStr = nd.toISOString().split('T')[0];
+      const nextDay = new Date(lastMjDate);
+      nextDay.setDate(nextDay.getDate() + 1); // +1天 = 明天
+      lastMjNextDayStr = nextDay.toISOString().split('T')[0];
     }
   }
 
@@ -570,11 +575,8 @@
     const days = last.getDate();
     document.getElementById("yearMonth").innerText = `${year}年${month+1}月`;
 
-    // 原有月份统计
     let monthMeetCount = 0;
     let monthHoursSum = 0;
-
-    // 当月麻将统计
     let monthMjCount = 0;
     let monthXi = 0;
     let monthDong = 0;
@@ -629,7 +631,7 @@
         <div class="day-content">${html}</div>
       `;
 
-      // 当天小时
+      // 当天时长
       if (item.hours) {
         const h = document.createElement("div");
         h.className = "day-hours";
@@ -637,15 +639,16 @@
         cell.appendChild(h);
       }
 
-      // 当天麻将数据（只在有x和d的日期显示）
-      if (item.x !== undefined && item.d !== undefined) {
+      // ✅ 当天麻将（只在当天显示）
+      const hasMjToday = item.x !== undefined && item.d !== undefined;
+      if (hasMjToday) {
         const m = document.createElement("div");
         m.className = "day-mj";
         m.textContent = `西:${item.x} 咚:${item.d}`;
         cell.appendChild(m);
       }
 
-      // 总时长（只在下一天显示）
+      // 总时长
       if (dateStr === lastEventNextDayStr && totalAllHours > 0) {
         const t = document.createElement("div");
         t.className = "total-hours";
@@ -653,8 +656,8 @@
         cell.appendChild(t);
       }
 
-      // 全局麻将累计（只在下一天显示，且当天没有麻将数据）
-      if (dateStr === lastMjNextDayStr && !(item.x !== undefined && item.d !== undefined)) {
+      // ✅ 全局累计：只在【最后一次麻将的下一天】显示，当天绝对不显示
+      if (dateStr === lastMjNextDayStr && !hasMjToday) {
         const mt = document.createElement("div");
         mt.className = "total-mj";
         mt.textContent = `西:${totalXi} 咚:${totalDong}`;
