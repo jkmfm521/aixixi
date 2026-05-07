@@ -178,7 +178,7 @@
       font-weight: bold;
     }
 
-    /* 麻将输赢样式 新增 */
+    /* 麻将输赢样式 */
     .day-mj {
       position: absolute;
       bottom: 6px;
@@ -484,7 +484,7 @@
   let totalAllHours = 0;
   let lastEventNextDayStr = null;
 
-  // 麻将全局统计 新增
+  // 麻将全局统计
   let totalXi = 0;
   let totalDong = 0;
   let lastMjNextDayStr = null;
@@ -492,7 +492,7 @@
   window.onload = async () => {
     await loadData();
     preCalculateTotalHours();
-    preCalculateMjTotal(); // 新增
+    preCalculateMjTotal();
     renderCalendar();
     initEmojiPanel();
     initDragPaste();
@@ -532,7 +532,7 @@
     }
   }
 
-  // 预计算麻将全局输赢 新增
+  // 预计算麻将全局输赢
   function preCalculateMjTotal() {
     totalXi = 0;
     totalDong = 0;
@@ -574,7 +574,7 @@
     let monthMeetCount = 0;
     let monthHoursSum = 0;
 
-    // 新增：当月麻将统计
+    // 当月麻将统计
     let monthMjCount = 0;
     let monthXi = 0;
     let monthDong = 0;
@@ -585,7 +585,6 @@
         const item = dayData[dateStr];
         if (item.bg) monthMeetCount++;
         if (item.hours) monthHoursSum += Number(item.hours);
-        // 麻将
         if (item.x !== undefined && item.d !== undefined) {
           monthMjCount++;
           monthXi += Number(item.x);
@@ -594,7 +593,6 @@
       }
     }
 
-    // 显示两行统计
     document.getElementById("monthStats").innerHTML = `
       总天数: ${days} | 见面: ${monthMeetCount}次 | 时长: ${monthHoursSum.toFixed(1)}h <br>
       麻将: ${monthMjCount}次 | 西:${monthXi} | 咚:${monthDong}
@@ -639,7 +637,7 @@
         cell.appendChild(h);
       }
 
-      // 当天麻将 新增
+      // 当天麻将
       if (item.x !== undefined && item.d !== undefined) {
         const m = document.createElement("div");
         m.className = "day-mj";
@@ -655,7 +653,7 @@
         cell.appendChild(t);
       }
 
-      // 全局麻将累计 新增
+      // 全局麻将累计（只在下一天显示）
       if (dateStr === lastMjNextDayStr) {
         const mt = document.createElement("div");
         mt.className = "total-mj";
