@@ -482,8 +482,6 @@
 
   // 总时长
   let totalAllHours = 0;
-  let lastEventNextDayStr = null;
-
   // 麻将全局统计
   let totalXi = 0;
   let totalDong = 0;
@@ -514,20 +512,11 @@
   // 预计算总时长
   function preCalculateTotalHours() {
     totalAllHours = 0;
-    let maxDateStr = null;
     for (const dateStr in dayData) {
       const item = dayData[dateStr];
       if (item.hours) {
         totalAllHours += Number(item.hours);
-        if (!maxDateStr || new Date(dateStr) > new Date(maxDateStr)) {
-          maxDateStr = dateStr;
-        }
       }
-    }
-    if (maxDateStr) {
-      const lastDate = new Date(maxDateStr);
-      lastDate.setDate(lastDate.getDate() + 1);
-      lastEventNextDayStr = lastDate.toISOString().split('T')[0];
     }
   }
 
@@ -588,7 +577,7 @@
 
     for (let i=0; i<firstWeekDay; i++) cal.appendChild(document.createElement("div"));
 
-    // ✅ 【今天】和【明天】的日期
+    // 【今天】和【明天】的日期
     const todayStr = new Date().toISOString().split('T')[0];
     const tomorrowDate = new Date();
     tomorrowDate.setDate(tomorrowDate.getDate() + 1);
@@ -636,16 +625,15 @@
         cell.appendChild(m);
       }
 
-      // 总时长
-      if (dateStr === lastEventNextDayStr && totalAllHours > 0 && !(item.hours)) {
+      // ✅ 总时长汇总：只在【今天的下一天】显示！
+      if (dateStr === tomorrowStr && !(item.hours)) {
         const t = document.createElement("div");
         t.className = "total-hours";
         t.textContent = totalAllHours.toFixed(1);
         cell.appendChild(t);
       }
 
-      // ✅ ✅ ✅ 终极正确规则：
-      // 麻将汇总 = 只在【今天的下一天】显示！！！
+      // ✅ 麻将汇总：只在【今天的下一天】显示！
       if (dateStr === tomorrowStr && !(item.x !== undefined && item.d !== undefined)) {
         const mt = document.createElement("div");
         mt.className = "total-mj";
