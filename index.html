@@ -532,13 +532,13 @@
     }
   }
 
-  // ✅ 重写：正确计算最后一次麻将的【下一天】
+  // ✅ 重写：计算全局麻将累计和最后一次麻将的下一天
   function preCalculateMjTotal() {
     totalXi = 0;
     totalDong = 0;
     let lastMjDate = null;
 
-    // 遍历所有日期，找到最后一次麻将
+    // 遍历所有日期，找到最后一次麻将，并累加输赢
     for (const dateStr in dayData) {
       const item = dayData[dateStr];
       if (item.x !== undefined && item.d !== undefined) {
@@ -639,7 +639,7 @@
         cell.appendChild(h);
       }
 
-      // ✅ 当天麻将（只在当天显示）
+      // ✅ 当天麻将（只在当天显示，普通黑色文字）
       const hasMjToday = item.x !== undefined && item.d !== undefined;
       if (hasMjToday) {
         const m = document.createElement("div");
@@ -656,7 +656,7 @@
         cell.appendChild(t);
       }
 
-      // ✅ 全局累计：只在【最后一次麻将的下一天】显示，当天绝对不显示
+      // ✅ 全局累计：只在【最后一次麻将的下一天】显示，且当天没有麻将数据（粉色加粗）
       if (dateStr === lastMjNextDayStr && !hasMjToday) {
         const mt = document.createElement("div");
         mt.className = "total-mj";
